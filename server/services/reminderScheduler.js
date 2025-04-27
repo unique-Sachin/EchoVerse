@@ -66,11 +66,10 @@ async function sendReminderEmail(user, entry) {
 async function processReminders() {
     try {
         const now = new Date();
-        const oneMinuteFromNow = new Date(now.getTime() + 60 * 1000);
 
         const reminders = await Reminder.find({
             reminderTime: { 
-                $lte: oneMinuteFromNow
+                $lte: now // Only get reminders that are due now or in the past
             },
             isSent: false
         }).populate('user').populate('entry');
