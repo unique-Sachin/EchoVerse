@@ -5,7 +5,7 @@ export interface User {
 }
 
 export interface Entry {
-  id: string;
+  _id: string;
   title: string;
   audioUrl: string;
   mood: string;
