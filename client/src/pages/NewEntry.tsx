@@ -58,7 +58,11 @@ const NewEntry = () => {
     const formData = new FormData();
     formData.append('title', title);
     formData.append('mood', mood);
-    formData.append('unlockAt', unlockDate);
+    
+    // Convert the selected time to UTC
+    const selectedDate = new Date(unlockDate);
+    formData.append('unlockAt', selectedDate.toISOString());
+    
     formData.append('audio', audioBlob, 'recording.mp3');
 
     try {

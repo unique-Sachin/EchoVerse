@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import { useState, useEffect } from 'react';
 import { FaCalendarAlt, FaChevronDown, FaChevronUp, FaClock, FaLock, FaMusic } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,7 +24,7 @@ const Timeline = () => {
       const currentDate = new Date();
       const currentYear = currentDate.getFullYear().toString();
       const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
-      
+
       // Set current year as expanded
       setExpandedYears(prev => ({
         ...prev,
@@ -54,13 +55,13 @@ const Timeline = () => {
 
   if (isLoading) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="flex items-center justify-center min-h-screen"
       >
         <motion.div
-          animate={{ 
+          animate={{
             rotate: 360,
             scale: [1, 1.2, 1]
           }}
@@ -93,14 +94,14 @@ const Timeline = () => {
   }, {} as Record<string, Record<string, Entry[]>>);
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
       className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 py-12 px-4 sm:px-6 lg:px-8"
     >
       <div className="max-w-4xl mx-auto">
-        <motion.div 
+        <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
@@ -193,7 +194,7 @@ const Timeline = () => {
                                   transition={{ duration: 0.3, delay: entryIndex * 0.1 }}
                                   className="bg-white rounded-xl shadow-sm overflow-hidden transform transition-all duration-300 hover:shadow-lg border border-gray-100"
                                 >
-                                  <motion.div 
+                                  <motion.div
                                     className="p-6"
                                   >
                                     <div className="flex justify-between items-start">
@@ -203,8 +204,8 @@ const Timeline = () => {
                                             {entry.title}
                                           </h3>
                                           <span className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 ${entry.isUnlocked
-                                              ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 hover:border-green-300'
-                                              : 'bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 hover:border-yellow-300'
+                                            ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 hover:border-green-300'
+                                            : 'bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 hover:border-yellow-300'
                                             }`}>
                                             {entry.isUnlocked ? 'Unlocked' : 'Locked'}
                                           </span>
@@ -219,7 +220,7 @@ const Timeline = () => {
                                           <div className="flex items-center hover:text-purple-600 transition-colors duration-300">
                                             <FaClock className="mr-2 text-purple-500 w-4 h-4" />
                                             <span>
-                                              {entry.isUnlocked ? "Unlocked: " : "Unlocks: "} {format(new Date(entry.unlockAt), 'MMMM d, yyyy h:mm a')}
+                                              {entry.isUnlocked ? "Unlocked: " : "Unlocks: "} {format(toZonedTime(new Date(entry.unlockAt), 'Asia/Kolkata'), 'MMMM d, yyyy h:mm a')}
                                             </span>
                                           </div>
                                         </div>
@@ -250,7 +251,7 @@ const Timeline = () => {
                                       <div className="mt-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-5 flex items-center justify-center border border-purple-100 hover:from-purple-100 hover:to-pink-100 transition-all duration-300">
                                         <FaLock className="text-gray-400 mr-2 w-5 h-5" />
                                         <span className="text-gray-500">
-                                          This memory will unlock on {format(new Date(entry.unlockAt), 'MMMM d, yyyy h:mm a')}
+                                          This memory will unlock on {format(toZonedTime(new Date(entry.unlockAt), 'Asia/Kolkata'), 'MMMM d, yyyy h:mm a')}
                                         </span>
                                       </div>
                                     )}
