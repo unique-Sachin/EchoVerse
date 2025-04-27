@@ -8,10 +8,15 @@ const auth = require('../middleware/auth');
 router.post('/', auth, async (req, res) => {
   try {
     const { entryId, reminderTime } = req.body;
-    const userId = req.user._id;
+    const userId = req.user._id || req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
 
     // Validate entry exists and belongs to user
     const entry = await Entry.findOne({ _id: entryId, user: userId });
+    
     if (!entry) {
       return res.status(404).json({ message: 'Entry not found or not owned by user' });
     }
