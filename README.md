@@ -67,6 +67,11 @@ JWT_SECRET=your_jwt_secret
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+FRONTEND_URL = http://localhost:5173
+ENCRYPTION_KEY = your_encription_key
+EMAIL_USER = email_id
+EMAIL_PASSWORD = email_password
+
 ```
 
 4. Start the development servers:
