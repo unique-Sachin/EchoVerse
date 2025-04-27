@@ -75,7 +75,12 @@ const NewEntry = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      navigate('/timeline');
+      if (response.status === 201) {
+        navigate('/timeline');
+      } else {
+        console.error('Failed to create entry:', response.data);
+        setIsSaving(false);
+      }
     } catch (err) {
       console.error('Error creating entry:', err);
       setIsSaving(false);
