@@ -1,70 +1,61 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
 const Reminder = require('../models/Reminder');
 const Entry = require('../models/Entry');
+const auth = require('../middleware/auth');
 
-// Create a reminder for an entry
+// Create a reminder
 router.post('/', auth, async (req, res) => {
   try {
     const { entryId, reminderTime } = req.body;
+    const userId = req.user._id;
 
     // Validate entry exists and belongs to user
-    const entry = await Entry.findOne({
-      _id: entryId,
-      user: req.user.id
-    });
-
+    const entry = await Entry.findOne({ _id: entryId, user: userId });
     if (!entry) {
-      return res.status(404).json({ msg: 'Entry not found' });
+      return res.status(404).json({ message: 'Entry not found or not owned by user' });
     }
 
-    // Create reminder
     const reminder = new Reminder({
-      user: req.user.id,
+      user: userId,
       entry: entryId,
-      reminderTime: new Date(reminderTime)
+      reminderTime
     });
 
     await reminder.save();
-    res.json(reminder);
-  } catch (err) {
-    console.error('Error creating reminder:', err);
-    res.status(500).json({ msg: 'Server error', error: err.message });
+    res.status(201).json(reminder);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating reminder' });
   }
 });
 
-// Get all reminders for user
+// Get all reminders for a user
 router.get('/', auth, async (req, res) => {
   try {
-    const reminders = await Reminder.find({ user: req.user.id })
-      .populate('entry', 'title unlockAt')
+    const reminders = await Reminder.find({ user: req.user._id })
+      .populate('entry')
       .sort({ reminderTime: 1 });
-    
     res.json(reminders);
-  } catch (err) {
-    console.error('Error fetching reminders:', err);
-    res.status(500).json({ msg: 'Server error', error: err.message });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching reminders' });
   }
 });
 
 // Delete a reminder
 router.delete('/:id', auth, async (req, res) => {
   try {
-    const reminder = await Reminder.findOne({
+    const reminder = await Reminder.findOneAndDelete({
       _id: req.params.id,
-      user: req.user.id
+      user: req.user._id
     });
 
     if (!reminder) {
-      return res.status(404).json({ msg: 'Reminder not found' });
+      return res.status(404).json({ message: 'Reminder not found' });
     }
 
-    await Reminder.deleteOne({ _id: req.params.id });
-    res.json({ msg: 'Reminder removed' });
-  } catch (err) {
-    console.error('Error deleting reminder:', err);
-    res.status(500).json({ msg: 'Server error', error: err.message });
+    res.json({ message: 'Reminder deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting reminder' });
   }
 });
 

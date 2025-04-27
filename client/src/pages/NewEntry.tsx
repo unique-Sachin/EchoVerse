@@ -75,7 +75,7 @@ const NewEntry = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      if (response.status === 201) {
+      if (response.status === 200 || response.status === 201) {
         navigate('/timeline');
       } else {
         console.error('Failed to create entry:', response.data);

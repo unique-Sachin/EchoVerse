@@ -25,7 +25,7 @@ const Timeline = () => {
     },
   });
 
-  
+
 
   const [expandedYears, setExpandedYears] = useState<Record<string, boolean>>({});
   const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({});

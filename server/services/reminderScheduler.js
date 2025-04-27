@@ -12,32 +12,52 @@ const transporter = nodemailer.createTransport({
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD
-    }
-    ,
+    },
+    tls: {
+        rejectUnauthorized: false
+    },
+    secure: true,
     port: 465,
-    host: "smtp.gmail.com"
+    host: 'smtp.gmail.com'
 });
 
 // Function to send reminder email
 async function sendReminderEmail(user, entry) {
     try {
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: `"EchoVerse" <${process.env.EMAIL_USER}>`,
             to: user.email,
             subject: 'EchoVerse: Your Memory is Ready!',
+            text: `Hello ${user.name},\n\nYour memory titled "${entry.title}" is now ready to be unlocked and listened to.\n\nVisit EchoVerse to listen to your memory: ${process.env.FRONTEND_URL}/timeline\n\nBest regards,\nThe EchoVerse Team`,
             html: `
-        <h2>Your Memory is Ready to be Unlocked!</h2>
-        <p>Hello ${user.name},</p>
-        <p>Your memory titled "${entry.title}" is now ready to be unlocked and listened to.</p>
-        <p>Visit EchoVerse to listen to your memory: <a href="${process.env.FRONTEND_URL}/timeline">View Timeline</a></p>
-        <p>Best regards,<br>The EchoVerse Team</p>
-      `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #4F46E5;">Your Memory is Ready to be Unlocked!</h2>
+          <p>Hello ${user.name},</p>
+          <p>Your memory titled <strong>"${entry.title}"</strong> is now ready to be unlocked and listened to.</p>
+          <div style="margin: 20px 0; text-align: center;">
+            <a href="${process.env.FRONTEND_URL}/timeline" 
+               style="background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+              View Your Memory
+            </a>
+          </div>
+          <p style="color: #666; font-size: 12px; margin-top: 20px;">
+            Best regards,<br>
+            The EchoVerse Team
+          </p>
+        </div>
+      `,
+            headers: {
+                'X-Priority': '1',
+                'X-MSMail-Priority': 'High',
+                'Importance': 'high',
+                'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`,
+                'Precedence': 'bulk'
+            }
         };
 
         await transporter.sendMail(mailOptions);
         return true;
     } catch (error) {
-        console.error('Error sending reminder email:', error);
         return false;
     }
 }
@@ -46,21 +66,19 @@ async function sendReminderEmail(user, entry) {
 async function processReminders() {
     try {
         const now = new Date();
-        const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60000); // 5 minutes from now
+        const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
 
-        // Only get reminders that are due within the next 5 minutes
         const reminders = await Reminder.find({
             reminderTime: { 
-                $gte: now,
                 $lte: fiveMinutesFromNow
             },
             isSent: false
         }).populate('user').populate('entry');
 
-        // Process reminders in batches of 10
         const batchSize = 10;
         for (let i = 0; i < reminders.length; i += batchSize) {
             const batch = reminders.slice(i, i + batchSize);
+            
             await Promise.all(batch.map(async (reminder) => {
                 const emailSent = await sendReminderEmail(reminder.user, reminder.entry);
                 if (emailSent) {
@@ -70,14 +88,13 @@ async function processReminders() {
             }));
         }
     } catch (error) {
-        console.error('Error processing reminders:', error);
+        // Silently handle errors
     }
 }
 
 // Schedule reminder processing to run every 5 minutes
 function startScheduler() {
     cron.schedule('*/5 * * * *', processReminders);
-    console.log('Reminder scheduler started');
 }
 
 module.exports = {
