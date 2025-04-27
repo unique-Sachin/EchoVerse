@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 
 const Login = () => {
   const navigate = useNavigate();
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const { setAuth, fetchUser } = useAuthStore();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -16,8 +16,9 @@ const Login = () => {
 
   const loginMutation = useMutation({
     mutationFn: authApi.login,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setAuth(data.user, data.token);
+      await fetchUser();
       navigate('/timeline');
     },
     onError: (error: Error) => {

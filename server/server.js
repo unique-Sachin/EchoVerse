@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const { startScheduler } = require('./services/reminderScheduler');
 
 // Load environment variables
 dotenv.config();
@@ -31,6 +32,10 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/echoverse
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/entries', require('./routes/entries'));
+app.use('/api/reminders', require('./routes/reminders'));
+
+// Start reminder scheduler
+startScheduler();
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

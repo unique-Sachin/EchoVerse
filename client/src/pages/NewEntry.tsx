@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../api/config';
 import { motion } from 'framer-motion';
 import { FaMicrophone, FaStop, FaSave, FaSpinner } from 'react-icons/fa';
+import api from '../api/config';
 
 const MOODS = ['😊', '😢', '😡', '😴', '🤔', '🎉', '💪', '❤️'];
 
@@ -56,17 +56,21 @@ const NewEntry = () => {
 
     setIsSaving(true);
     const formData = new FormData();
-    formData.append('title', title);
-    formData.append('mood', mood);
+    formData.append('title', title.trim());
+    formData.append('mood', encodeURIComponent(mood));
     
-    // Convert the selected time to UTC
+    // Ensure unlockAt is a valid date and in UTC
     const selectedDate = new Date(unlockDate);
+    if (isNaN(selectedDate.getTime())) {
+      setIsSaving(false);
+      return;
+    }
     formData.append('unlockAt', selectedDate.toISOString());
     
     formData.append('audio', audioBlob, 'recording.mp3');
 
     try {
-      await api.post('/entries', formData, {
+      const response = await api.post('/entries', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

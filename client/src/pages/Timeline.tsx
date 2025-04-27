@@ -4,17 +4,28 @@ import { toZonedTime } from 'date-fns-tz';
 import { useState, useEffect } from 'react';
 import { FaCalendarAlt, FaChevronDown, FaChevronUp, FaClock, FaLock, FaMusic } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import { api } from '../api/config';
 import { Entry } from '../types';
+import api from '../api/config';
+import ReminderButton from '../components/ReminderButton';
 
 const Timeline = () => {
-  const { data: entries, isLoading } = useQuery<Entry[]>({
+  const { data: entries, isLoading: isLoadingEntries } = useQuery<Entry[]>({
     queryKey: ['entries'],
     queryFn: async () => {
       const res = await api.get('/entries');
       return res.data;
     },
   });
+
+  const { data: reminders, isLoading: isLoadingReminders } = useQuery({
+    queryKey: ['reminders'],
+    queryFn: async () => {
+      const res = await api.get('/reminders');
+      return res.data;
+    },
+  });
+
+  
 
   const [expandedYears, setExpandedYears] = useState<Record<string, boolean>>({});
   const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({});
@@ -53,7 +64,7 @@ const Timeline = () => {
     }));
   };
 
-  if (isLoading) {
+  if (isLoadingEntries || isLoadingReminders) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
@@ -188,7 +199,7 @@ const Timeline = () => {
                             >
                               {monthEntries.map((entry, entryIndex) => (
                                 <motion.div
-                                  key={entry.id}
+                                  key={entry._id}
                                   initial={{ y: 20, opacity: 0 }}
                                   animate={{ y: 0, opacity: 1 }}
                                   transition={{ duration: 0.3, delay: entryIndex * 0.1 }}
@@ -225,10 +236,17 @@ const Timeline = () => {
                                           </div>
                                         </div>
                                       </div>
-                                      <div className="flex items-center">
+                                      <div className="flex items-center gap-2">
                                         <div className="text-3xl bg-gradient-to-br from-purple-100 to-pink-100 p-4 rounded-full border border-purple-200 hover:from-purple-200 hover:to-pink-200 transition-all duration-300">
                                           {entry.mood}
                                         </div>
+                                        {!entry.isUnlocked && (
+                                          <ReminderButton
+                                            entryId={entry._id}
+                                            unlockAt={new Date(entry.unlockAt)}
+                                            existingReminder={reminders?.find((r: any) => r.entry._id === entry._id)}
+                                          />
+                                        )}
                                       </div>
                                     </div>
 

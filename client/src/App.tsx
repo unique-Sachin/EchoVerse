@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/layout/Layout';
 import { useAuthStore } from './store/authStore';
+import { useEffect } from 'react';
 
 // Pages (we'll create these next)
 import Home from './pages/Home';
@@ -18,6 +19,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
+  const { fetchUser } = useAuthStore();
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Router>

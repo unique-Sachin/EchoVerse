@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { AuthState } from '../types';
+import { authApi } from '../api/auth';
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
@@ -14,5 +15,19 @@ export const useAuthStore = create<AuthState>((set) => ({
   clearAuth: () => {
     localStorage.removeItem('token');
     set({ user: null, token: null, isAuthenticated: false });
+  },
+
+  fetchUser: async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const user = await authApi.getCurrentUser();
+        set({ user, isAuthenticated: true });
+      }
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      localStorage.removeItem('token');
+      set({ user: null, token: null, isAuthenticated: false });
+    }
   }
 })); 

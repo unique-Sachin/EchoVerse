@@ -14,6 +14,14 @@ const EntrySchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  audioIv: {
+    type: String,
+    required: true
+  },
+  encryptedAudio: {
+    type: String,
+    required: true
+  },
   mood: {
     type: String,
     required: true

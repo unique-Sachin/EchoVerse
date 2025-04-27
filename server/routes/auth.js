@@ -74,9 +74,11 @@ router.post('/login', async (req, res) => {
       payload,
       process.env.JWT_SECRET,
       { expiresIn: '24h' },
-      (err, token) => {
+      async (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        // Get user data without password
+        const userData = await User.findById(user.id).select('-password');
+        res.json({ token, user: userData });
       }
     );
   } catch (err) {
@@ -106,5 +108,28 @@ router.post('/logout', auth, async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+// Middleware to verify JWT token
+const verifyToken = (req, res, next) => {
+  // Get token from header
+  const token = req.header('Authorization')?.replace('Bearer ', '') || req.header('x-auth-token');
+
+  // Check if no token
+  if (!token) {
+    console.log('No token provided');
+    return res.status(401).json({ msg: 'No token, authorization denied' });
+  }
+
+  try {
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Token verified successfully:', decoded);
+    req.user = decoded.user;
+    next();
+  } catch (err) {
+    console.error('Token verification failed:', err.message);
+    res.status(401).json({ msg: 'Token is not valid' });
+  }
+};
 
 module.exports = router;

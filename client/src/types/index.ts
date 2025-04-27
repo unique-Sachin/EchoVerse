@@ -21,4 +21,5 @@ export interface AuthState {
   isAuthenticated: boolean;
   setAuth: (user: User | null, token: string) => void;
   clearAuth: () => void;
+  fetchUser: () => Promise<void>;
 } 

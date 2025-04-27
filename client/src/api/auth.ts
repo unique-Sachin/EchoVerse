@@ -1,5 +1,5 @@
-import { api } from './config';
 import { User } from '../types';
+import api from './config';
 
 interface LoginCredentials {
   email: string;
@@ -31,7 +31,7 @@ export const authApi = {
   },
 
   getCurrentUser: async (): Promise<User> => {
-    const response = await api.get<User>('/auth/me');
+    const response = await api.get<User>('/auth');
     return response.data;
   }
 }; 
