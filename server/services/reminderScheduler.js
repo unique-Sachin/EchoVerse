@@ -66,11 +66,11 @@ async function sendReminderEmail(user, entry) {
 async function processReminders() {
     try {
         const now = new Date();
-        const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+        const oneMinuteFromNow = new Date(now.getTime() + 60 * 1000);
 
         const reminders = await Reminder.find({
             reminderTime: { 
-                $lte: fiveMinutesFromNow
+                $lte: oneMinuteFromNow
             },
             isSent: false
         }).populate('user').populate('entry');
@@ -92,9 +92,9 @@ async function processReminders() {
     }
 }
 
-// Schedule reminder processing to run every 5 minutes
+// Schedule reminder processing to run every minute
 function startScheduler() {
-    cron.schedule('*/5 * * * *', processReminders);
+    cron.schedule('* * * * *', processReminders);
 }
 
 module.exports = {
